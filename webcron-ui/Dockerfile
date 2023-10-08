@@ -1,7 +1,8 @@
 # docker run -d -p 8000:8000 u2509/webcron-ui:base
 #docker build -t u2509/webcron-ui:base .
+# docker build -t u2509/webcron-ui:base . --build-arg https_proxy=http://172.16.160.147:7890 --build-arg http_proxy=http://172.16.160.147:7890
 
-FROM continuumio/anaconda3:2022.05
+FROM continuumio/anaconda3:2022.10
 
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -105,16 +106,21 @@ RUN /opt/bin/wrap_chrome_binary
 ARG CHROME_DRIVER_VERSION
 RUN if [ -z "$CHROME_DRIVER_VERSION" ]; \
   then CHROME_MAJOR_VERSION=$(google-chrome --version | sed -E "s/.* ([0-9]+)(\.[0-9]+){3}.*/\1/") \
-    && CHROME_DRIVER_VERSION=$(wget --no-verbose -O - "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_MAJOR_VERSION}"); \
+    && NO_SUCH_KEY=$(curl -ls https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_MAJOR_VERSION} | head -n 1 | grep -oe NoSuchKey) ; \
+    if [ -n "$NO_SUCH_KEY" ]; then \
+      echo "No Chromedriver for version $CHROME_MAJOR_VERSION. Use previous major version instead" \
+      && CHROME_MAJOR_VERSION=$(expr $CHROME_MAJOR_VERSION - 1); \
+    fi ; \
+    CHROME_DRIVER_VERSION=$(wget --no-verbose -O - "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_MAJOR_VERSION}"); \
   fi \
   && echo "Using chromedriver version: "$CHROME_DRIVER_VERSION \
   && wget --no-verbose -O /tmp/chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip \
   && rm -rf /opt/selenium/chromedriver \
-  && unzip /tmp/chromedriver_linux64.zip -d /opt/selenium \
+  && sudo unzip /tmp/chromedriver_linux64.zip -d /opt/selenium \
   && rm /tmp/chromedriver_linux64.zip \
-  && mv /opt/selenium/chromedriver /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION \
-  && chmod 755 /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION \
-  && ln -fs /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION /usr/bin/chromedriver  
+  && sudo mv /opt/selenium/chromedriver /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION \
+  && sudo chmod 755 /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION \
+  && sudo ln -fs /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION /usr/bin/chromedriver 
 
 ENV   HOST 0.0.0.0
 
