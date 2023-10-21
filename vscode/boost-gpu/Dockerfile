@@ -1,11 +1,13 @@
 # 使用 NVIDIA CUDA 12.2.0 运行时基础镜像
 # docker build -t gpu-vscode:cuda12-ubuntu22.04 .
 # docker run -d -p 8085:8080 -e PASSWORD="123456" --name xgboost-gpu --gpus all gpu-vscode:cuda12-ubuntu22.04
+# docker run -d -p 8085:8080 -e PASSWORD="Fxb@2310"  -v /home/u2509/temp/bridge/codeCangku:/workspace -v /home/u2509/temp:/bridge --name fxb --gpus all gpu-vscode:cuda12-ubuntu22.04-plugins
 FROM nvidia/cuda:12.2.0-runtime-ubuntu22.04
 
 # 更新系统并安装必要的依赖
 RUN apt-get update && apt-get install -y \
     python3-pip \
+    python3-venv \
     build-essential \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /tmp/*
@@ -30,6 +32,23 @@ RUN ln -s /usr/bin/node /usr/local/lib/node
 
 # 安装 code-server
 RUN curl -fsSL https://code-server.dev/install.sh | sh
+
+RUN apt-get update && apt-get install -y \
+    python3-venv \
+    &&  \
+
+
+#  安装 Python 扩展
+RUN pip3 install --no-cache-dir \
+    pandas \
+    numpy \
+    matplotlib \
+    seaborn \
+    scikit-learn \
+    setuptools \
+    scipy \
+    hyperopt \
+    optuna
 
 # 设置工作目录
 WORKDIR /workspace
