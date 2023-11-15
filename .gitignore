@@ -127,3 +127,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+/jupyterhub/default/Anaconda3-2023.03-Linux-x86_64.sh

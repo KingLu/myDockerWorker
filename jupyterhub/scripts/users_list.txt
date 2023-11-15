@@ -1,0 +1,1 @@
+ml01:ml01@ml:512:512:first user:/opt/jupyterhub/ml01:/bin/bash
