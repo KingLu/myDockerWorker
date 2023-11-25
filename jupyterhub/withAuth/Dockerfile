@@ -5,7 +5,12 @@ FROM u2509/mllab:micro
 # docker build -t u2509/mllab:auth -f withAuth/Dockerfile .
 # docker run -d -it -p 8002:8000 --name ml-lab-auth u2509/mllab:auth
 # 安装 oauthenticator
-RUN pip install oauthenticator
+RUN pip install oauthenticator&&\
+    clean-layer.sh
+
+RUN apt-get update && apt-get install -y sudo &&\
+    clean-layer.sh
+
 
 # 将 GitLab OAuth 配置追加到 JupyterHub 配置文件
 COPY jupyterhub_config.py  /opt/jupyterhub/config/jupyterhub_config.py
