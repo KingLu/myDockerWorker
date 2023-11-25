@@ -16,6 +16,8 @@ c.GitLabOAuthenticator.client_secret = os.getenv('GITLAB_CLIENT_SECRET')
 
 # 如果使用自托管的 GitLab，设置 GitLab 的 URL
 c.GitLabOAuthenticator.gitlab_url = os.getenv('GITLAB_URL')
+# 指定 GitLab OAuth 的scope
+c.GitLabOAuthenticator.scope = ['read_user']
 
 # 从文件读取白名单用户列表，并设置 JupyterHub 白名单
 def get_users_from_file(file_path):
@@ -27,9 +29,10 @@ def get_users_from_file(file_path):
         print(f"Error reading from file {file_path}: {e}")
         return []
 
-whitelist = get_users_from_file('/home/jupyterhub_whitelist')
-if whitelist:
-    c.Authenticator.whitelist = set(whitelist)
+# 从文件读取允许的用户列表，并设置 JupyterHub 允许的用户
+allowed_users = get_users_from_file('/home/jupyterhub_whitelist')
+if allowed_users:
+    c.Authenticator.allowed_users = set(allowed_users)
 
 # 从环境变量获取管理员用户列表，并设置 JupyterHub 管理员
 admin_users = os.getenv('JUPYTERHUB_ADMIN_USERS')
